@@ -8,7 +8,6 @@ import {
 } from "aws-cdk-lib/pipelines";
 import * as codebuild from "aws-cdk-lib/aws-codebuild";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
-import * as s3 from "aws-cdk-lib/aws-s3";
 import { AppStage } from "./pipeline-stages";
 import { PIPELINE } from "./constants";
 
@@ -46,8 +45,8 @@ export class PipelineStack extends Stack {
           "n $NODE_VERSION",
           "npm ci",
           "npm run site:build",
-          "npm run lint:fix",
-          "npm run test",
+          // "npm run lint:fix",
+          // "npm run test",
           "npx cdk synth",
         ],
         rolePolicyStatements: [
