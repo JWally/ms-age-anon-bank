@@ -29,7 +29,7 @@ export class PipelineStack extends Stack {
     const source = CodePipelineSource.connection(repo, "main", {
       triggerOnPush: true,
       connectionArn:
-        "arn:aws:codeconnections:us-east-1:334993921855:connection/61b0f2fc-c8ca-4112-8917-fad5d578fc55",
+        "arn:aws:codeconnections:us-east-1:263318538229:connection/5e42184e-acde-441b-8273-47d29bf27bd5",
     });
 
     const pipeline = new CodePipeline(this, id, {
