@@ -23,18 +23,14 @@ export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
 
-    const { rootDomain, siteDomains } = props;
+    const { rootDomain, siteDomains, repo } = props;
 
-    const sourceBucket = s3.Bucket.fromBucketName(
-      this,
-      "SourceBucket",
-      "git-repo-ms-age-anon-bank-demo",
-    );
-
-    const source = CodePipelineSource.s3(
-      sourceBucket,
-      "artifacts/artifact.zip",
-    );
+    // Define GitHub source using props
+    const source = CodePipelineSource.connection(repo, "main", {
+      triggerOnPush: true,
+      connectionArn:
+        "arn:aws:codeconnections:us-east-1:334993921855:connection/61b0f2fc-c8ca-4112-8917-fad5d578fc55",
+    });
 
     const pipeline = new CodePipeline(this, id, {
       crossAccountKeys: true,
