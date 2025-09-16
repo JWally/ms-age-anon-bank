@@ -44,6 +44,7 @@ export class TheStack extends cdk.Stack {
       stage,
       projectName: id,
       secretConstruct: secretsManager,
+      domain: siteDomains?.[0] || "",
     });
 
     // Create API Gateway (updated with new endpoints)

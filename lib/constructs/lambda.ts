@@ -17,6 +17,7 @@ interface LambdaConstructProps {
   stage: string;
   projectName: string;
   secretConstruct: SecretConstruct;
+  domain: string;
 }
 
 /**
@@ -32,7 +33,7 @@ export class LambdaConstruct extends Construct {
   constructor(scope: Construct, id: string, props: LambdaConstructProps) {
     super(scope, id);
 
-    const { environment, stackName, secretConstruct } = props;
+    const { environment, stackName, secretConstruct, domain } = props;
 
     // Common Lambda configuration
     const commonConfig = {
@@ -56,6 +57,7 @@ export class LambdaConstruct extends Construct {
         LOG_LEVEL: environment === "prod" ? "INFO" : "DEBUG",
         SECRET_ARN: secretConstruct.secret.secretArn,
         KEY_CACHE_DURATION_MS: "900000", // 15 minutes
+        DOMAIN: domain,
       },
       tracing: Tracing.ACTIVE,
       logRetention: RetentionDays.TWO_WEEKS,

@@ -16,7 +16,11 @@ import cors from "@middy/http-cors";
 
 import { isWarmingUp, onWarmup } from "../../helpers/middy-helpers";
 import { POWERTOOLS_SERVICE_NAME } from "../../helpers/constants";
-import { signPayload, getCurrentKeyId } from "../../services/key-management";
+import {
+  signPayload,
+  getCurrentKeyId,
+  getPublicKeys,
+} from "../../services/key-management";
 
 // Powertools
 const TOOL_NAME = `${POWERTOOLS_SERVICE_NAME}-age-verification`;
@@ -35,6 +39,8 @@ interface AgeVerificationPayload {
   ipAddressHash: string;
   payload: unknown;
   timestamp: number;
+  publicKey: string;
+  publicKeyLocation: string;
 }
 
 // This is the actual handler
@@ -45,9 +51,14 @@ export const lambdaHandler = async (
     // Extract body and ipAddress
     const { body } = event;
     const ipAddress = event.requestContext.identity.sourceIp;
+    const origin = event.headers.origin as string;
 
     if (!ipAddress) throw new Error("No IP address on identity");
     if (!body) throw new Error("No body provided on event");
+
+    const [serverPublicKeyInfo] = (await getPublicKeys()).filter((el) => {
+      return el.status === "current";
+    });
 
     // we're ok with a stupid string here
     // we really don't care what we're signing
@@ -70,6 +81,9 @@ export const lambdaHandler = async (
       ipAddressHash,
       payload: userPayload,
       timestamp: Date.now(),
+      publicKey: serverPublicKeyInfo.publicKey,
+      publicKeyLocation:
+        `api-${process.env.ENVIRONMENT}.${process.env.DOMAIN}/.well-known/keys` as string,
     };
 
     // Base64 encode the payload
