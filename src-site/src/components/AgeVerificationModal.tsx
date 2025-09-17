@@ -324,7 +324,7 @@ const useAgeVerification = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const response = await fetch(`api-${location.host}/v1/verify`, {
+      const response = await fetch(`https://api-${location.host}/v1/verify`, {
         method: "POST",
         body: state.merchantToken,
         headers: {
