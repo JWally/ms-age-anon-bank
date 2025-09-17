@@ -111,6 +111,7 @@ export const lambdaHandler = async (
         target: base64Payload,
         signature,
         keyId, // Include key ID for verification
+        domain: `${process.env.ENVIRONMENT}.${process.env.DOMAIN}`,
       }),
     };
   } catch (error) {
