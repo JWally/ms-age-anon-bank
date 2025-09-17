@@ -282,8 +282,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLoginSuccess, onClose }) => {
             error={error}
             isLoading={isLoading}
             isMobile={true}
-            usernameRef={usernameRef}
-            mobileUsernameRef={mobileUsernameRef}
+            usernameRef={usernameRef as React.RefObject<HTMLInputElement>}
+            mobileUsernameRef={
+              mobileUsernameRef as React.RefObject<HTMLInputElement>
+            }
             onInputChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onSubmit={handleSubmit}
@@ -368,8 +370,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLoginSuccess, onClose }) => {
               error={error}
               isLoading={isLoading}
               isMobile={false}
-              usernameRef={usernameRef}
-              mobileUsernameRef={mobileUsernameRef}
+              usernameRef={usernameRef as React.RefObject<HTMLInputElement>}
+              mobileUsernameRef={
+                mobileUsernameRef as React.RefObject<HTMLInputElement>
+              }
               onInputChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onSubmit={handleSubmit}

@@ -324,16 +324,13 @@ const useAgeVerification = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const response = await fetch(
-        "https://api-dev-jw.ironbank.click/v1/verify",
-        {
-          method: "POST",
-          body: state.merchantToken,
-          headers: {
-            "content-type": "application/json",
-          },
+      const response = await fetch(`api-${location.host}/v1/verify`, {
+        method: "POST",
+        body: state.merchantToken,
+        headers: {
+          "content-type": "application/json",
         },
-      );
+      });
 
       const signedResponse = await response.json();
 
@@ -490,8 +487,10 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
               error={error}
               isProcessing={isProcessing}
               isMobile={true}
-              textareaRef={textareaRef}
-              mobileTextareaRef={mobileTextareaRef}
+              textareaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
+              mobileTextareaRef={
+                mobileTextareaRef as React.RefObject<HTMLTextAreaElement>
+              }
               onUpdateMerchantToken={updateMerchantToken}
               onVerifyAge={verifyAge}
             />
@@ -589,8 +588,12 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
                 error={error}
                 isProcessing={isProcessing}
                 isMobile={false}
-                textareaRef={textareaRef}
-                mobileTextareaRef={mobileTextareaRef}
+                textareaRef={
+                  textareaRef as React.RefObject<HTMLTextAreaElement>
+                }
+                mobileTextareaRef={
+                  mobileTextareaRef as React.RefObject<HTMLTextAreaElement>
+                }
                 onUpdateMerchantToken={updateMerchantToken}
                 onVerifyAge={verifyAge}
               />
