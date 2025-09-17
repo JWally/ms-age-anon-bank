@@ -35,16 +35,16 @@ const LandingPage = ({ onLoginClick, onAgeVerificationClick }) => {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
               <button
-                onClick={onLoginClick}
-                className="btn btn-primary btn-lg w-full sm:w-auto"
-              >
-                User Log In
-              </button>
-              <button
                 onClick={onAgeVerificationClick}
-                className="btn btn-secondary w-full btn-lg w-full sm:w-auto"
+                className="btn btn-primary w-full btn-lg w-full sm:w-auto"
               >
                 Age Verification
+              </button>
+              <button
+                onClick={onLoginClick}
+                className="btn btn-secondary btn-lg w-full sm:w-auto"
+              >
+                User Log In
               </button>
             </div>
 
