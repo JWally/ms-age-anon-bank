@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 
-// Types
 interface AgeVerificationModalProps {
   onClose: () => void;
 }
@@ -14,273 +13,9 @@ interface VerificationState {
   tokenCopied: boolean;
 }
 
-// Move InputStep outside to prevent recreation on every render
-interface InputStepProps {
-  merchantToken: string;
-  error: string;
-  isProcessing: boolean;
-  isMobile: boolean;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
-  mobileTextareaRef: React.RefObject<HTMLTextAreaElement>;
-  onUpdateMerchantToken: (token: string) => void;
-  onVerifyAge: () => void;
-}
-
-const InputStep: React.FC<InputStepProps> = ({
-  merchantToken,
-  error,
-  isProcessing,
-  isMobile,
-  textareaRef,
-  mobileTextareaRef,
-  onUpdateMerchantToken,
-  onVerifyAge,
-}) => (
-  <div className={isMobile ? "space-y-4" : "space-y-6"}>
-    <div
-      className={`bg-blue-50 border border-blue-200 rounded-md ${isMobile ? "p-3" : "p-4"}`}
-    >
-      <h3
-        className={`${isMobile ? "text-sm" : "text-base"} font-semibold text-blue-900 mb-1.5`}
-      >
-        Verification Protocol
-      </h3>
-      <p className={`${isMobile ? "text-xs" : "text-sm"} text-blue-800 mt-1`}>
-        We anonymously verify age claims through cryptographic attestation. We
-        only expose if you are over 18 or over 21. We cannot tell where this is
-        being used.
-      </p>
-      <p className={`${isMobile ? "text-xs" : "text-sm"} text-blue-800 mt-2`}>
-        Fully KYC/AML compliant.
-      </p>
-      <p
-        className={`${isMobile ? "text-xs" : "text-sm"} text-blue-800 ${isMobile ? "mt-2" : "mt-4"}`}
-      >
-        Fully GLBA Compliant. The <b>BANK</b> doesn't share this information
-        with third parties. <b>YOU</b> do.
-      </p>
-    </div>
-
-    <div>
-      <label
-        className={`block ${isMobile ? "text-sm" : "text-sm"} font-medium text-gray-700 mb-1.5`}
-      >
-        STEP 2: Paste Token Here
-      </label>
-      <textarea
-        ref={isMobile ? mobileTextareaRef : textareaRef}
-        value={merchantToken}
-        onChange={(e) => onUpdateMerchantToken(e.target.value)}
-        placeholder="Paste the verification token received from the merchant..."
-        rows={isMobile ? 4 : 4}
-        className={`w-full ${isMobile ? "px-3 py-2 text-sm" : "px-3 py-2 text-sm"} text-gray-900 font-mono border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-        disabled={isProcessing}
-        style={{ minHeight: isMobile ? "80px" : "auto" }}
-      />
-    </div>
-
-    {error && (
-      <div className="bg-red-50 border border-red-200 rounded-md p-2.5">
-        <p className={`text-red-600 ${isMobile ? "text-xs" : "text-sm"}`}>
-          {error}
-        </p>
-      </div>
-    )}
-
-    <button
-      onClick={onVerifyAge}
-      disabled={isProcessing || !merchantToken.trim()}
-      className={`w-full ${isMobile ? "py-2.5 px-3 text-sm" : "py-3 px-4 text-sm"} bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
-      style={{ minHeight: isMobile ? "40px" : "auto" }}
-    >
-      {isProcessing ? (
-        <div className="flex items-center justify-center">
-          <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          Processing Verification...
-        </div>
-      ) : (
-        "Verify Age & Sign Token"
-      )}
-    </button>
-
-    <div
-      className={`grid grid-cols-3 gap-3 bg-gray-50 rounded-md ${isMobile ? "p-3" : "p-4"}`}
-    >
-      <div className="text-center">
-        <div
-          className={`${isMobile ? "text-[10px]" : "text-xs"} text-gray-500 mb-0.5`}
-        >
-          Standard
-        </div>
-        <div
-          className={`${isMobile ? "text-xs" : "text-sm"} font-semibold text-blue-600`}
-        >
-          KYC Level 3
-        </div>
-      </div>
-      <div className="text-center">
-        <div
-          className={`${isMobile ? "text-[10px]" : "text-xs"} text-gray-500 mb-0.5`}
-        >
-          Encryption
-        </div>
-        <div
-          className={`${isMobile ? "text-xs" : "text-sm"} font-semibold text-blue-600`}
-        >
-          AES-256
-        </div>
-      </div>
-      <div className="text-center">
-        <div
-          className={`${isMobile ? "text-[10px]" : "text-xs"} text-gray-500 mb-0.5`}
-        >
-          Validity
-        </div>
-        <div
-          className={`${isMobile ? "text-xs" : "text-sm"} font-semibold text-blue-600`}
-        >
-          24 Hours
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// Move ResultStep outside as well
-interface ResultStepProps {
-  signedToken: string;
-  tokenCopied: boolean;
-  isMobile: boolean;
-  onCopySignedToken: () => void;
-  onClose: () => void;
-}
-
-const ResultStep: React.FC<ResultStepProps> = ({
-  signedToken,
-  tokenCopied,
-  isMobile,
-  onCopySignedToken,
+const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
   onClose,
-}) => (
-  <div className={isMobile ? "space-y-4" : "space-y-6"}>
-    <div
-      className={`text-center bg-green-50 border border-green-200 rounded-md ${isMobile ? "p-4" : "p-6"}`}
-    >
-      <div className="flex justify-center mb-2">
-        <div
-          className={`flex items-center justify-center ${isMobile ? "w-12 h-12" : "w-12 h-12"} bg-green-100 rounded-full`}
-        >
-          <svg
-            className={`${isMobile ? "w-6 h-6" : "w-6 h-6"} text-green-600`}
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
-      </div>
-      <h3
-        className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-green-900 mb-1`}
-      >
-        Verification Complete
-      </h3>
-      <p className={`${isMobile ? "text-xs" : "text-sm"} text-green-800`}>
-        Identity verified • Age requirement satisfied
-      </p>
-    </div>
-
-    <div>
-      <label
-        className={`block ${isMobile ? "text-sm" : "text-sm"} font-medium text-gray-700 mb-1.5`}
-      >
-        Cryptographically Signed Token
-      </label>
-      <div className="flex gap-3">
-        <textarea
-          value={signedToken}
-          readOnly
-          rows={isMobile ? 4 : 4}
-          className={`flex-1 ${isMobile ? "px-3 py-2 text-xs" : "px-3 py-2 text-xs"} font-mono text-blue-600 bg-blue-50 border border-blue-200 rounded-md`}
-        />
-      </div>
-      <p className={`mt-1 ${isMobile ? "text-xs" : "text-sm"} text-gray-500`}>
-        ( Return this signed token to the merchant to complete the verification
-        process )
-      </p>
-    </div>
-
-    <button
-      onClick={onCopySignedToken}
-      className={`w-full ${isMobile ? "py-2.5 px-3 text-sm" : "py-3 px-4 text-sm"} font-medium rounded-md ${
-        tokenCopied
-          ? "text-green-600 bg-white border border-green-300"
-          : "bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-      }`}
-      style={{ minHeight: isMobile ? "40px" : "auto" }}
-    >
-      {tokenCopied ? "Copied!" : "Copy Token"}
-    </button>
-
-    <div className={`bg-gray-50 rounded-md ${isMobile ? "p-3" : "p-4"}`}>
-      <h4
-        className={`${isMobile ? "text-sm" : "text-sm"} font-semibold text-gray-900 mb-2`}
-      >
-        Verification Details
-      </h4>
-      <div className={`space-y-1.5 ${isMobile ? "text-xs" : "text-sm"}`}>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Verification ID:</span>
-          <span className="font-mono text-gray-700 text-[10px]">
-            IB-VER-{Date.now()}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Issued:</span>
-          <span className="text-gray-700">{new Date().toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Expires:</span>
-          <span className="text-gray-700">
-            {new Date(Date.now() + 86400000).toLocaleString()}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <button
-      onClick={onClose}
-      className={`w-full ${isMobile ? "py-2.5 px-3 text-sm" : "py-3 px-4 text-sm"} text-gray-700 bg-white border border-gray-300 hover:bg-gray-50`}
-      style={{ minHeight: isMobile ? "40px" : "auto" }}
-    >
-      Close
-    </button>
-  </div>
-);
-
-// Custom hook for verification flow
-const useAgeVerification = () => {
+}) => {
   const [state, setState] = useState<VerificationState>({
     step: "input",
     merchantToken: "",
@@ -290,176 +25,156 @@ const useAgeVerification = () => {
     tokenCopied: false,
   });
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const liveRef = useRef<HTMLDivElement | null>(null);
+
+  // Lock page scroll + focus textarea
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const t = setTimeout(() => textareaRef.current?.focus(), 150);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      clearTimeout(t);
+    };
+  }, []);
+
+  // ESC to close
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [onClose]);
+
+  const announce = (msg: string) => {
+    if (liveRef.current) liveRef.current.textContent = msg;
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
   const updateMerchantToken = (token: string) => {
-    setState((prev) => ({
-      ...prev,
-      merchantToken: token,
-      error: "",
-    }));
+    setState((p) => ({ ...p, merchantToken: token, error: "" }));
   };
 
   const verifyAge = async () => {
-    if (!state.merchantToken.trim()) {
-      setState((prev) => ({
-        ...prev,
+    const token = state.merchantToken.trim();
+    if (!token) {
+      setState((p) => ({
+        ...p,
         error: "Please provide the merchant verification token",
       }));
+      announce("Please provide the merchant verification token");
       return;
     }
-
-    if (state.merchantToken.length < 10) {
-      setState((prev) => ({
-        ...prev,
-        error: "Invalid token format",
+    if (token.length < 10) {
+      setState((p) => ({
+        ...p,
+        error: "Invalid token format - token appears too short",
       }));
+      announce("Invalid token format");
       return;
     }
 
-    setState((prev) => ({
-      ...prev,
-      isProcessing: true,
-      error: "",
-    }));
-
+    setState((p) => ({ ...p, isProcessing: true, error: "" }));
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
       const response = await fetch(`https://api-${location.host}/v1/verify`, {
         method: "POST",
-        body: state.merchantToken,
-        headers: {
-          "content-type": "application/json",
-        },
+        headers: { "content-type": "application/json" },
+        body: token, // match content-type
       });
 
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const signedResponse = await response.json();
 
-      setState((prev) => ({
-        ...prev,
+      setState((p) => ({
+        ...p,
         signedToken: btoa(JSON.stringify(signedResponse)),
         step: "result",
       }));
+      announce("Verification complete");
     } catch (err) {
-      setState((prev) => ({
-        ...prev,
-        error: "Verification process failed. Please try again.",
+      setState((p) => ({
+        ...p,
+        error:
+          "Verification process failed. Please check your token and try again.",
       }));
+      announce("Verification failed");
     } finally {
-      setState((prev) => ({
-        ...prev,
-        isProcessing: false,
-      }));
+      setState((p) => ({ ...p, isProcessing: false }));
     }
   };
 
   const copySignedToken = () => {
     navigator.clipboard.writeText(state.signedToken);
-    setState((prev) => ({ ...prev, tokenCopied: true }));
-    setTimeout(() => {
-      setState((prev) => ({ ...prev, tokenCopied: false }));
-    }, 2000);
+    setState((p) => ({ ...p, tokenCopied: true }));
+    announce("Token copied to clipboard");
+    setTimeout(() => setState((p) => ({ ...p, tokenCopied: false })), 2000);
   };
 
-  return {
-    ...state,
-    updateMerchantToken,
-    verifyAge,
-    copySignedToken,
-  };
-};
-
-// Main component
-const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
-  onClose,
-}) => {
-  const {
-    step,
-    merchantToken,
-    signedToken,
-    isProcessing,
-    error,
-    tokenCopied,
-    updateMerchantToken,
-    verifyAge,
-    copySignedToken,
-  } = useAgeVerification();
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const mobileTextareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
-  // Auto-focus the textarea when modal mounts and we're on the input step
-  useEffect(() => {
-    if (step === "input") {
-      const timer = setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-        }
-        if (mobileTextareaRef.current) {
-          mobileTextareaRef.current.focus();
-        }
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [step]);
-
-  // Handle backdrop click to close modal (desktop only)
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  // Prevent scroll events from propagating to background
-  const handleModalScroll = (e: React.UIEvent) => {
-    e.stopPropagation();
-  };
-
-  return (
-    <>
-      {/* Mobile: Fullscreen Modal */}
-      <div className="fixed inset-0 z-50 sm:hidden bg-gray-50 flex flex-col">
-        {/* Mobile Header - Sticky */}
-        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full mr-2.5">
-                <svg
-                  className="w-4 h-4 text-blue-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+  const renderInputStep = () => (
+    <div className="px-6 py-6 sm:px-8 sm:py-8">
+      {/* Protocol Info */}
+      <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-blue-900 mb-2">
+              Privacy-First Verification
+            </h3>
+            <p className="text-sm text-blue-800 leading-relaxed mb-3">
+              We anonymously verify age claims through cryptographic
+              attestation. We only expose if you are over 18 or over 21. We
+              cannot tell where this is being used.
+            </p>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <span className="text-blue-700">KYC/AML Compliant</span>
               </div>
-              <div>
-                <h2 className="text-base font-semibold text-gray-900">
-                  Age Verification
-                </h2>
-                <p className="text-xs text-gray-600">Iron Bank KYC Division</p>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <span className="text-blue-700">GLBA Compliant</span>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Close"
-            >
+          </div>
+        </div>
+      </div>
+
+      {/* Token Input */}
+      <div className="space-y-4 mb-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Step 2: Paste Verification Token
+          </label>
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              value={state.merchantToken}
+              onChange={(e) => updateMerchantToken(e.target.value)}
+              placeholder="Paste the verification token received from the merchant..."
+              rows={4}
+              className="w-full px-4 py-3 text-sm font-mono text-gray-900 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+              disabled={state.isProcessing}
+            />
+            <div className="absolute top-3 right-3">
               <svg
-                className="w-5 h-5"
+                className="w-5 h-5 text-gray-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -468,103 +183,386 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-            </button>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Body - Scrollable */}
-        <div
-          className="flex-1 overflow-y-auto px-4 py-4"
-          onWheel={handleModalScroll}
-          onTouchMove={handleModalScroll}
-        >
-          {step === "input" ? (
-            <InputStep
-              merchantToken={merchantToken}
-              error={error}
-              isProcessing={isProcessing}
-              isMobile={true}
-              textareaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
-              mobileTextareaRef={
-                mobileTextareaRef as React.RefObject<HTMLTextAreaElement>
-              }
-              onUpdateMerchantToken={updateMerchantToken}
-              onVerifyAge={verifyAge}
-            />
-          ) : (
-            <ResultStep
-              signedToken={signedToken}
-              tokenCopied={tokenCopied}
-              isMobile={true}
-              onCopySignedToken={copySignedToken}
-              onClose={onClose}
-            />
-          )}
-        </div>
+        {/* Error */}
+        {state.error && (
+          <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
+            <div className="flex items-center gap-3">
+              <svg
+                className="w-5 h-5 text-red-400 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <p className="text-sm text-red-600 font-medium">{state.error}</p>
+            </div>
+          </div>
+        )}
 
-        {/* Mobile Footer - Sticky */}
-        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-200 px-4 py-3">
-          <div className="text-center">
-            <p className="text-[10px] text-gray-500 mb-0.5">
-              Iron Bank of Braavos • Established 298 AC • Member FDIC
-            </p>
-            <p className="text-[10px] text-gray-400">
-              Privacy-preserving verification powered by enterprise security
-              standards
-            </p>
+        {/* Submit */}
+        <button
+          onClick={verifyAge}
+          disabled={state.isProcessing || !state.merchantToken.trim()}
+          className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {state.isProcessing ? (
+            <>
+              <div
+                className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                style={{ animation: "spin 1s linear infinite" }}
+              />
+              <span>Processing Verification...</span>
+            </>
+          ) : (
+            <>
+              <span>Verify Age & Sign Token</span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Security Stats */}
+      <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 rounded-xl">
+        {[
+          { label: "Standard", value: "KYC Level 3", icon: "certificate" },
+          { label: "Encryption", value: "AES-256", icon: "lock" },
+          { label: "Validity", value: "24 Hours", icon: "clock" },
+        ].map((stat, i) => (
+          <div key={i} className="text-center">
+            <div className="w-8 h-8 mx-auto mb-2 bg-blue-100 rounded-lg flex items-center justify-center">
+              {stat.icon === "certificate" && (
+                <svg
+                  className="w-4 h-4 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                  />
+                </svg>
+              )}
+              {stat.icon === "lock" && (
+                <svg
+                  className="w-4 h-4 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+              )}
+              {stat.icon === "clock" && (
+                <svg
+                  className="w-4 h-4 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              )}
+            </div>
+            <div className="text-xs text-gray-500 mb-1">{stat.label}</div>
+            <div className="text-sm font-semibold text-blue-600">
+              {stat.value}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderResultStep = () => (
+    <div className="px-6 py-6 sm:px-8 sm:py-8">
+      {/* Success Header */}
+      <div className="text-center mb-8 p-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-xl">
+        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+          <svg
+            className="w-8 h-8 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-green-900 mb-2">
+          Verification Complete
+        </h3>
+        <p className="text-green-800">
+          Identity verified • Age requirement satisfied
+        </p>
+      </div>
+
+      {/* Signed Token */}
+      <div className="space-y-4 mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Cryptographically Signed Token
+        </label>
+        <div className="relative">
+          <textarea
+            value={state.signedToken}
+            readOnly
+            rows={4}
+            className="w-full px-4 py-3 text-xs font-mono text-blue-700 bg-blue-50 border border-blue-200 rounded-lg resize-none focus:outline-none"
+          />
+          <button
+            onClick={copySignedToken}
+            className="absolute top-3 right-3 p-1.5 text-blue-500 hover:text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+            title="Copy to clipboard"
+          >
+            {state.tokenCopied ? (
+              <svg
+                className="w-4 h-4 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
+        <p className="text-sm text-gray-500 italic">
+          Return this signed token to the merchant to complete the verification
+          process
+        </p>
+      </div>
+
+      {/* Copy Button */}
+      <button
+        onClick={copySignedToken}
+        className={`w-full py-3.5 px-4 font-semibold rounded-lg shadow-md transition-all flex items-center justify-center gap-2 mb-6 ${
+          state.tokenCopied
+            ? "bg-green-50 border-2 border-green-200 text-green-700"
+            : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:shadow-lg"
+        }`}
+      >
+        {state.tokenCopied ? (
+          <>
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <span>Copied to Clipboard!</span>
+          </>
+        ) : (
+          <>
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
+            </svg>
+            <span>Copy Token</span>
+          </>
+        )}
+      </button>
+
+      {/* Verification Details */}
+      <div className="p-6 bg-gray-50 rounded-xl">
+        <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <svg
+            className="w-4 h-4 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          <span>Verification Details</span>
+        </h4>
+        <div className="space-y-3 text-sm">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Verification ID:</span>
+            <span className="font-mono text-xs text-gray-800 bg-white px-2 py-1 rounded">
+              IB-VER-{Date.now().toString().slice(-6)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Issued:</span>
+            <span className="text-gray-800">{new Date().toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Expires:</span>
+            <span className="text-gray-800">
+              {new Date(Date.now() + 86400000).toLocaleString()}
+            </span>
           </div>
         </div>
       </div>
+    </div>
+  );
 
-      {/* Desktop: Centered Modal */}
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md"
+      onClick={handleBackdropClick}
+    >
       <div
-        className="hidden sm:flex fixed inset-0 items-center justify-center z-50 p-4 bg-black bg-opacity-50 text-gray-900"
-        onClick={handleBackdropClick}
-        onWheel={(e) => e.stopPropagation()}
-        onTouchMove={(e) => e.stopPropagation()}
-        style={{ backdropFilter: "blur(4px)" }}
+        className="
+          absolute inset-0 flex items-stretch justify-stretch p-0
+          sm:items-center sm:justify-center sm:p-4
+        "
       >
         <div
-          className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
-          onWheel={handleModalScroll}
-          onTouchMove={handleModalScroll}
+          className="
+            relative bg-white w-screen h-screen
+            sm:w-full sm:h-auto sm:max-w-2xl
+            sm:rounded-2xl sm:border sm:border-gray-100
+            shadow-2xl flex flex-col overflow-hidden
+            animate-[modalIn_0.22s_cubic-bezier(.16,1,.3,1)]
+          "
+          style={{
+            paddingTop: "env(safe-area-inset-top)",
+            paddingBottom: "env(safe-area-inset-bottom)",
+          }}
         >
-          {/* Desktop Header - Fixed */}
-          <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center">
-                <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full mr-3">
+          <style jsx>{`
+            @keyframes modalIn {
+              from {
+                opacity: 0;
+                transform: translateY(8px) scale(0.985);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+            @keyframes spin {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(360deg);
+              }
+            }
+          `}</style>
+
+          {/* Header (sticky) */}
+          <div className="px-6 pt-5 pb-4 border-b border-gray-100 bg-white sticky top-0 z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
                   <svg
-                    className="w-5 h-5 text-blue-600"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-                      clipRule="evenodd"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    Age Verification
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {state.step === "input"
+                      ? "Age Verification"
+                      : "Verification Complete"}
                   </h2>
-                  <p className="text-sm text-gray-600">
-                    Iron Bank KYC Compliance Division
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Iron Bank KYC Division
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1"
                 aria-label="Close"
+                className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors group"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 text-gray-400 group-hover:text-gray-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -580,49 +578,42 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
             </div>
           </div>
 
-          {/* Desktop Body - Scrollable */}
-          <div className="px-6 py-6 overflow-y-auto flex-1">
-            {step === "input" ? (
-              <InputStep
-                merchantToken={merchantToken}
-                error={error}
-                isProcessing={isProcessing}
-                isMobile={false}
-                textareaRef={
-                  textareaRef as React.RefObject<HTMLTextAreaElement>
-                }
-                mobileTextareaRef={
-                  mobileTextareaRef as React.RefObject<HTMLTextAreaElement>
-                }
-                onUpdateMerchantToken={updateMerchantToken}
-                onVerifyAge={verifyAge}
-              />
-            ) : (
-              <ResultStep
-                signedToken={signedToken}
-                tokenCopied={tokenCopied}
-                isMobile={false}
-                onCopySignedToken={copySignedToken}
-                onClose={onClose}
-              />
-            )}
+          {/* SR live region */}
+          <div ref={liveRef} aria-live="polite" className="sr-only" />
+
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto [overscroll-behavior:contain] [-webkit-overflow-scrolling:touch]">
+            {state.step === "input" ? renderInputStep() : renderResultStep()}
           </div>
 
-          {/* Desktop Footer - Fixed */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg flex-shrink-0">
-            <div className="w-full text-center">
-              <p className="text-xs text-gray-500 mb-1">
-                Iron Bank of Braavos • Established 298 AC • Member FDIC
-              </p>
-              <p className="text-xs text-gray-400">
-                Privacy-preserving verification powered by enterprise security
-                standards
-              </p>
+          {/* Footer (sticky) */}
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <div className="flex items-center justify-center gap-4 text-gray-500">
+              <div className="flex items-center gap-2">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
+                </svg>
+                <span className="text-xs">
+                  Iron Bank of Braavos • Est. 298 AC
+                </span>
+              </div>
+              <span className="text-gray-300">•</span>
+              <span className="text-xs">Privacy-preserving verification</span>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

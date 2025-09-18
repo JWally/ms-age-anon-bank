@@ -5,349 +5,145 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
-// Move FormContent outside to prevent recreation on every render
-interface FormContentProps {
-  formData: { username: string; password: string };
-  error: string;
-  isLoading: boolean;
-  isMobile: boolean;
-  usernameRef: React.RefObject<HTMLInputElement>;
-  mobileUsernameRef: React.RefObject<HTMLInputElement>;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  onSubmit: () => void;
-}
-
-const FormContent: React.FC<FormContentProps> = ({
-  formData,
-  error,
-  isLoading,
-  isMobile,
-  usernameRef,
-  mobileUsernameRef,
-  onInputChange,
-  onKeyDown,
-  onSubmit,
-}) => (
-  <div className={isMobile ? "space-y-4" : "space-y-6"}>
-    <div>
-      <label
-        className={`block ${isMobile ? "text-sm" : "text-sm"} font-medium text-gray-700 mb-1.5`}
-      >
-        Username
-      </label>
-      <input
-        ref={isMobile ? mobileUsernameRef : usernameRef}
-        type="text"
-        name="username"
-        value={formData.username}
-        onChange={onInputChange}
-        onKeyDown={onKeyDown}
-        className={`w-full ${isMobile ? "px-3 py-2 text-sm" : "px-3 py-2 text-sm"} text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-        placeholder="Enter your username"
-        autoComplete="username"
-        disabled={isLoading}
-        style={{ minHeight: isMobile ? "38px" : "44px" }}
-      />
-    </div>
-
-    <div>
-      <label
-        className={`block ${isMobile ? "text-sm" : "text-sm"} font-medium text-gray-700 mb-1.5`}
-      >
-        Password
-      </label>
-      <input
-        type="password"
-        name="password"
-        value={formData.password}
-        onChange={onInputChange}
-        onKeyDown={onKeyDown}
-        className={`w-full ${isMobile ? "px-3 py-2 text-sm" : "px-3 py-2 text-sm"} text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-        placeholder="Enter your password"
-        autoComplete="current-password"
-        disabled={isLoading}
-        style={{ minHeight: isMobile ? "38px" : "44px" }}
-      />
-    </div>
-
-    {error && (
-      <div className="bg-red-50 border border-red-200 rounded-md p-2.5">
-        <p className={`text-red-600 ${isMobile ? "text-xs" : "text-sm"}`}>
-          {error}
-        </p>
-      </div>
-    )}
-
-    <button
-      onClick={onSubmit}
-      disabled={isLoading}
-      className={`w-full ${isMobile ? "py-2.5 px-3 text-sm" : "py-3 px-4 text-sm"} bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
-      style={{ minHeight: isMobile ? "40px" : "auto" }}
-    >
-      {isLoading ? (
-        <div className="flex items-center justify-center">
-          <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          Signing In...
-        </div>
-      ) : (
-        "Sign In"
-      )}
-    </button>
-  </div>
-);
-
-// Move DemoNotice outside as well
-interface DemoNoticeProps {
-  isMobile: boolean;
-}
-
-const DemoNotice: React.FC<DemoNoticeProps> = ({ isMobile }) => (
-  <div
-    className={`bg-blue-50 border border-blue-200 rounded-md ${isMobile ? "p-3" : "p-4"} ${isMobile ? "mt-4" : "mt-6"}`}
-  >
-    <div className="flex">
-      <svg
-        className={`${isMobile ? "w-4 h-4" : "w-5 h-5"} text-blue-400 mt-0.5 mr-2.5 flex-shrink-0`}
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path
-          fillRule="evenodd"
-          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-          clipRule="evenodd"
-        />
-      </svg>
-      <div>
-        <h3
-          className={`${isMobile ? "text-xs" : "text-sm"} font-medium text-blue-800`}
-        >
-          Demo Environment
-        </h3>
-        <p
-          className={`${isMobile ? "text-xs" : "text-sm"} text-blue-700 mt-0.5`}
-        >
-          This is a demonstration. Any username and password combination will
-          grant access.
-        </p>
-      </div>
-    </div>
-  </div>
-);
-
 const AuthModal: React.FC<AuthModalProps> = ({ onLoginSuccess, onClose }) => {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const usernameRef = useRef<HTMLInputElement>(null);
-  const mobileUsernameRef = useRef<HTMLInputElement>(null);
 
-  // Prevent background scrolling when modal is open
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
+    document.body.style.overflow = "hidden"; // lock page scroll
+    const t = setTimeout(() => usernameRef.current?.focus(), 150);
     return () => {
       document.body.style.overflow = originalOverflow;
+      clearTimeout(t);
     };
   }, []);
 
-  // Auto-focus the username input when modal mounts
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (usernameRef.current) {
-        usernameRef.current.focus();
-      }
-      if (mobileUsernameRef.current) {
-        mobileUsernameRef.current.focus();
-      }
-    }, 100);
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [onClose]);
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Handle backdrop click to close modal (desktop only)
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  // Prevent scroll events from propagating to background
-  const handleModalScroll = (e: React.UIEvent) => {
-    e.stopPropagation();
+    if (e.target === e.currentTarget) onClose();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (error) setError(""); // Clear error when user types
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !isLoading) {
-      handleSubmit();
-    }
+    if (e.key === "Enter" && !isLoading) handleSubmit();
   };
 
   const handleSubmit = async () => {
     if (!formData.username.trim() || !formData.password.trim()) {
-      setError("Username and password are required");
+      setError("Please enter both username and password");
       return;
     }
-
     setIsLoading(true);
     setError("");
-
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Demo: Accept any credentials
+      await new Promise((r) => setTimeout(r, 1200));
       onLoginSuccess(formData.username);
-    } catch (err) {
-      setError("Authentication failed. Please try again.");
+    } catch {
+      setError("Authentication failed. Please verify your credentials.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <>
-      {/* Mobile: Fullscreen Modal */}
-      <div className="fixed inset-0 z-50 sm:hidden bg-gray-50 flex flex-col">
-        {/* Mobile Header - Sticky */}
-        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Sign In</h2>
-              <p className="text-xs text-gray-600">
-                Access your Iron Bank account
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Close"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Body - Scrollable */}
-        <div
-          className="flex-1 overflow-y-auto px-4 py-4"
-          onWheel={handleModalScroll}
-          onTouchMove={handleModalScroll}
-        >
-          <FormContent
-            formData={formData}
-            error={error}
-            isLoading={isLoading}
-            isMobile={true}
-            usernameRef={usernameRef as React.RefObject<HTMLInputElement>}
-            mobileUsernameRef={
-              mobileUsernameRef as React.RefObject<HTMLInputElement>
-            }
-            onInputChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            onSubmit={handleSubmit}
-          />
-          <DemoNotice isMobile={true} />
-
-          {/* Additional mobile options */}
-          <div className="mt-6 space-y-3">
-            <button className="w-full text-center text-sm text-blue-600 font-medium py-2">
-              Forgot Password?
-            </button>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-gray-50 text-gray-500">OR</span>
-              </div>
-            </div>
-            <button className="w-full text-center text-sm text-gray-600 py-2">
-              Create New Account
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Footer - Sticky */}
-        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-200 px-4 py-3">
-          <p className="text-[10px] text-gray-500 text-center">
-            Secured with enterprise-grade encryption
-          </p>
-        </div>
-      </div>
-
-      {/* Desktop: Centered Modal */}
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md"
+      onClick={handleBackdropClick}
+    >
+      {/* Container:
+          - Mobile: full screen sheet (w-screen/h-screen, no rounding)
+          - ≥sm: centered card (max-w-md, rounded) */}
       <div
-        className="hidden sm:flex fixed inset-0 items-center justify-center z-50 p-4 bg-black bg-opacity-50"
-        onClick={handleBackdropClick}
-        onWheel={(e) => e.stopPropagation()}
-        onTouchMove={(e) => e.stopPropagation()}
-        style={{ backdropFilter: "blur(4px)" }}
+        className="
+          absolute inset-0 flex items-stretch justify-stretch p-0
+          sm:items-center sm:justify-center sm:p-4
+        "
       >
         <div
-          className="bg-white rounded-lg shadow-xl max-w-md w-full"
-          onWheel={handleModalScroll}
-          onTouchMove={handleModalScroll}
+          className="
+            relative bg-white w-screen h-screen
+            sm:w-full sm:h-auto sm:max-w-md
+            sm:rounded-2xl sm:border sm:border-gray-100
+            shadow-2xl
+            flex flex-col overflow-hidden
+            animate-[modalIn_0.22s_cubic-bezier(.16,1,.3,1)]
+          "
+          style={{
+            // iOS safe areas
+            paddingTop: "env(safe-area-inset-top)",
+            paddingBottom: "env(safe-area-inset-bottom)",
+          }}
         >
-          {/* Desktop Header */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Sign In</h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Access your Iron Bank account
-                </p>
+          <style jsx>{`
+            @keyframes modalIn {
+              from {
+                opacity: 0;
+                transform: translateY(8px) scale(0.985);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+            @keyframes spin {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(360deg);
+              }
+            }
+          `}</style>
+
+          {/* Header (sticky on mobile) */}
+          <div className="px-6 pt-5 pb-4 border-b border-gray-100 bg-white sticky top-0 z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Sign In</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Access your Iron Bank account
+                  </p>
+                </div>
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1"
+                className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors group"
                 aria-label="Close"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 text-gray-400 group-hover:text-gray-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -363,33 +159,211 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLoginSuccess, onClose }) => {
             </div>
           </div>
 
-          {/* Desktop Body */}
-          <div className="px-6 py-6">
-            <FormContent
-              formData={formData}
-              error={error}
-              isLoading={isLoading}
-              isMobile={false}
-              usernameRef={usernameRef as React.RefObject<HTMLInputElement>}
-              mobileUsernameRef={
-                mobileUsernameRef as React.RefObject<HTMLInputElement>
-              }
-              onInputChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onSubmit={handleSubmit}
-            />
-            <DemoNotice isMobile={false} />
+          {/* Scrollable content */}
+          <div
+            className="
+              flex-1 overflow-y-auto px-6 py-6
+              [overscroll-behavior:contain]
+              [-webkit-overflow-scrolling:touch]
+            "
+          >
+            <div className="space-y-6 max-w-md mx-auto">
+              {/* Username */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 block">
+                  Username
+                </label>
+                <div className="relative">
+                  <input
+                    ref={usernameRef}
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    className="w-full px-4 py-3.5 text-gray-900 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+                    placeholder="Enter your username"
+                    autoComplete="username"
+                    disabled={isLoading}
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 block">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    className="w-full px-4 py-3.5 text-gray-900 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 pr-12"
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:text-gray-600 transition-colors"
+                    tabIndex={-1}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? (
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Error */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <svg
+                      className="w-5 h-5 text-red-400 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <p className="text-sm text-red-600 font-medium">{error}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* CTA */}
+              <button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <div
+                      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                      style={{ animation: "spin 1s linear infinite" }}
+                    />
+                    <span>Authenticating...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign In</span>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </>
+                )}
+              </button>
+
+              {/* Demo Notice */}
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg
+                      className="w-3 h-3 text-blue-600"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-900 mb-1">
+                      Demo Environment
+                    </h4>
+                    <p className="text-sm text-blue-700">
+                      This is a demonstration. Any username and password
+                      combination will grant access.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Desktop Footer */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-            <p className="text-xs text-gray-500 text-center">
+          {/* Footer (sticky on mobile) */}
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <p className="text-xs text-gray-500">
               Secured with enterprise-grade encryption
             </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
