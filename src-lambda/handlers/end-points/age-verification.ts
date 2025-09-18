@@ -21,6 +21,7 @@ import {
   getCurrentKeyId,
   getPublicKeys,
 } from "../../services/key-management";
+import { getClientIp } from "../../helpers/ip-address";
 
 // Powertools
 const TOOL_NAME = `${POWERTOOLS_SERVICE_NAME}-age-verification`;
@@ -50,8 +51,7 @@ export const lambdaHandler = async (
   try {
     // Extract body and ipAddress
     const { body } = event;
-    const ipAddress = event.requestContext.identity.sourceIp;
-    const origin = event.headers.origin as string;
+    const ipAddress = getClientIp(event);
 
     if (!ipAddress) throw new Error("No IP address on identity");
     if (!body) throw new Error("No body provided on event");
