@@ -5,12 +5,11 @@ interface AgeVerificationModalProps {
 }
 
 interface VerificationState {
-  step: "input" | "result";
+  step: "input" | "copy" | "complete";
   merchantToken: string;
   signedToken: string;
   isProcessing: boolean;
   error: string;
-  tokenCopied: boolean;
 }
 
 const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
@@ -22,7 +21,6 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
     signedToken: "",
     isProcessing: false,
     error: "",
-    tokenCopied: false,
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -91,7 +89,7 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
       setState((p) => ({
         ...p,
         signedToken: btoa(JSON.stringify(signedResponse)),
-        step: "result",
+        step: "copy",
       }));
       announce("Verification complete");
     } catch (err) {
@@ -106,11 +104,14 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
     }
   };
 
-  const copySignedToken = () => {
+  const copyTokenAndProceed = () => {
     navigator.clipboard.writeText(state.signedToken);
-    setState((p) => ({ ...p, tokenCopied: true }));
+    setState((p) => ({ ...p, step: "complete" }));
     announce("Token copied to clipboard");
-    setTimeout(() => setState((p) => ({ ...p, tokenCopied: false })), 2000);
+  };
+
+  const goBackToWebsite = () => {
+    window.history.back();
   };
 
   const renderInputStep = () => (
@@ -118,30 +119,15 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
       {/* Protocol Info */}
       <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
-          </div>
           <div className="flex-1">
             <h3 className="font-semibold text-blue-900 mb-2">
               Privacy-First Verification
             </h3>
-            <p className="text-sm text-blue-800 leading-relaxed mb-3">
-              We anonymously verify age claims through cryptographic
-              attestation. We only expose if you are over 18 or over 21. We
-              cannot tell where this is being used.
-            </p>
+            <ul className="list-disc list-outside text-sm text-blue-800 leading-relaxed mb-3 pl-3 space-y-1">
+              <li>We only reveal whether you are over 18 or over 21</li>
+              <li>Your information is never transmitted to anyone else</li>
+              <li>We cannot see where this verification is being used</li>
+            </ul>
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full" />
@@ -312,7 +298,7 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
     </div>
   );
 
-  const renderResultStep = () => (
+  const renderCopyStep = () => (
     <div className="px-6 py-6 sm:px-8 sm:py-8">
       {/* Success Header */}
       <div className="text-center mb-8 p-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-xl">
@@ -340,7 +326,7 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
       </div>
 
       {/* Signed Token */}
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 mb-8">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Cryptographically Signed Token
         </label>
@@ -351,96 +337,35 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
             rows={4}
             className="w-full px-4 py-3 text-xs font-mono text-blue-700 bg-blue-50 border border-blue-200 rounded-lg resize-none focus:outline-none"
           />
-          <button
-            onClick={copySignedToken}
-            className="absolute top-3 right-3 p-1.5 text-blue-500 hover:text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
-            title="Copy to clipboard"
-          >
-            {state.tokenCopied ? (
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            ) : (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                />
-              </svg>
-            )}
-          </button>
         </div>
-        <p className="text-sm text-gray-500 italic">
-          Return this signed token to the merchant to complete the verification
-          process
+        <p className="text-sm text-gray-500 italic text-center">
+          Click the button below to copy this token to your clipboard
         </p>
       </div>
 
       {/* Copy Button */}
       <button
-        onClick={copySignedToken}
-        className={`w-full py-3.5 px-4 font-semibold rounded-lg shadow-md transition-all flex items-center justify-center gap-2 mb-6 ${
-          state.tokenCopied
-            ? "bg-green-50 border-2 border-green-200 text-green-700"
-            : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:shadow-lg"
-        }`}
+        onClick={copyTokenAndProceed}
+        className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
       >
-        {state.tokenCopied ? (
-          <>
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            <span>Copied to Clipboard!</span>
-          </>
-        ) : (
-          <>
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-            <span>Copy Token</span>
-          </>
-        )}
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+          />
+        </svg>
+        <span>Copy Token</span>
       </button>
 
       {/* Verification Details */}
-      <div className="p-6 bg-gray-50 rounded-xl">
+      <div className="mt-8 p-6 bg-gray-50 rounded-xl">
         <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <svg
             className="w-4 h-4 text-gray-600"
@@ -478,6 +403,106 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
       </div>
     </div>
   );
+
+  const renderCompleteStep = () => (
+    <div className="px-6 py-6 sm:px-8 sm:py-8">
+      {/* Success Header */}
+      <div className="text-center mb-8 p-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-xl">
+        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+          <svg
+            className="w-8 h-8 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-green-900 mb-2">Token Copied!</h3>
+        <p className="text-green-800">
+          Your verification token has been copied to your clipboard
+        </p>
+      </div>
+
+      {/* Instructions */}
+      <div className="mb-8 p-6 bg-blue-50 border border-blue-100 rounded-xl">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg
+              className="w-5 h-5 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h4 className="font-semibold text-blue-900 mb-2">Next Steps</h4>
+            <p className="text-sm text-blue-800 leading-relaxed">
+              Your verification token is now ready to use. Return to the
+              merchant's website and paste the token when prompted to complete
+              your age verification.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Go Back Button */}
+      <button
+        onClick={goBackToWebsite}
+        className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+      >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+          />
+        </svg>
+        <span>Go Back to Your Website</span>
+      </button>
+
+      {/* Token Preview (smaller) */}
+      <div className="mt-8 p-4 bg-gray-50 rounded-xl">
+        <h4 className="text-sm font-medium text-gray-700 mb-2">
+          Token Preview
+        </h4>
+        <div className="text-xs font-mono text-gray-600 bg-white p-3 rounded border break-all">
+          {state.signedToken.slice(0, 60)}...
+        </div>
+      </div>
+    </div>
+  );
+
+  const getStepTitle = () => {
+    switch (state.step) {
+      case "input":
+        return "Age Verification";
+      case "copy":
+        return "Verification Complete";
+      case "complete":
+        return "Token Copied";
+      default:
+        return "Age Verification";
+    }
+  };
 
   return (
     <div
@@ -530,7 +555,7 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
           <div className="px-6 pt-5 pb-4 border-b border-gray-100 bg-white sticky top-0 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 bg-blue-800 rounded-xl flex items-center justify-center shadow-md">
                   <svg
                     className="w-5 h-5 text-white"
                     fill="none"
@@ -547,9 +572,7 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">
-                    {state.step === "input"
-                      ? "Age Verification"
-                      : "Verification Complete"}
+                    {getStepTitle()}
                   </h2>
                   <p className="text-xs text-gray-500 mt-0.5">
                     Iron Bank KYC Division
@@ -583,7 +606,9 @@ const AgeVerificationModal: React.FC<AgeVerificationModalProps> = ({
 
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto [overscroll-behavior:contain] [-webkit-overflow-scrolling:touch]">
-            {state.step === "input" ? renderInputStep() : renderResultStep()}
+            {state.step === "input" && renderInputStep()}
+            {state.step === "copy" && renderCopyStep()}
+            {state.step === "complete" && renderCompleteStep()}
           </div>
 
           {/* Footer (sticky) */}
